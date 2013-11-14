@@ -6,8 +6,8 @@ from math import sqrt
 weight_params = {
     'pitch' : 1,
     'timbre' : 1,
-    'loudness_begin' : 0.5,
-    'loudness_max' : 0.5,
+    'mean_loudness' : 1,
+    'confidence' : 0,
     'duration' : 0
 }
 
@@ -15,29 +15,17 @@ def euclidean_distance(v1, v2):
     sq_diff = [(a - b) ** 2 for a,b in zip(v1, v2)]
     return sqrt(sum(sq_diff))
 
-def distance_segments(seg1, seg2):
-    """ distance between two AudioQuantum segments """
+def distance_beats(beat1, beat2):
+    """ distance between two AudioQuantum beatments """
     distances = {
-        'pitch' : euclidean_distance(seg1.pitches, seg2.pitches),
-        'timbre' : euclidean_distance(seg1.timbre, seg2.timbre),
-        'loudness_begin' : abs(seg1.loudness_begin - seg2.loudness_begin),
-        'loudness_max' : abs(seg1.loudness_max - seg2.loudness_max),
-        'duration' : abs(seg1.duration - seg2.duration),
+        'pitch' : euclidean_distance(beat1.mean_pitches(), beat2.mean_pitches()),
+        'timbre' : euclidean_distance(beat1.mean_timbre(), beat2.mean_timbre()),
+        'mean_loudness' : abs(beat1.mean_loudness() - beat2.mean_loudness()),
+        'confidence' : abs(beat1.confidence - beat2.confidence),
+        'duration' : abs(beat1.duration - beat2.duration),
     }
     distance = 0
     for kind, distance in distances.iteritems():
         distance += distance * weight_params[kind]
     return distance
-
-def distance_beats(beat1, beat2):
-    """ distance between two AudioQuantum beats with many ideas copied from
-    Infinite Jukebox code, view-source:http://labs.echonest.com/Uploader/index.html?trid=TRORQWV13762CDDF4C
-    """
-    distance = 0
-    for seg1, seg2 in itertools.product(beat1.segments, beat2.segments):
-        if seg1 == seg2:
-            continue
-        distance += distance_segments(seg1, seg2)
-    return distance
-
 
