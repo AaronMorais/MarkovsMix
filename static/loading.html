@@ -1,0 +1,16 @@
+<div class="jumbotron">
+	<div class="row">
+	    <div class=".col-md-2">
+	    	Your music is loading...
+		    <img style="float:right" class="media-object" src="/static/image/spinner.gif">
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){ 
+	    setTimeout(function () {
+	    	updateContainer("/static/play.html");
+	    }, 1000);
+	});
+</script>
