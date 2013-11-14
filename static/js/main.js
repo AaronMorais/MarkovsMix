@@ -1,3 +1,28 @@
+var songs = [
+	{
+		title: "Fun",
+		length: "2:20"
+	},
+	{
+		title:"Hello",
+		length: "5:10"
+	},
+	{
+		title:"Rolling in the deep",
+		length: "10:10"
+	},
+]
+
+function updateTable () {
+	var table = $(".uploadTable tbody");
+	var entries = [];
+	for (var i = 0; i < songs.length; i++) {
+		var row = "<tr><td>" + (i+1) + "</td><td>" + songs[i].title + "</td><td>" + songs[i].length + "</td></tr>";
+		entries.push(row);
+	}
+	table.html(entries);
+}
+
 var loading = false;
 
 $(document).ready(function(){ 

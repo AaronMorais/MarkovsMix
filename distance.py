@@ -4,9 +4,8 @@ from math import sqrt
 
 
 weight_params = {
-    'pitch', 1
+    'pitch' : 1,
     'timbre' : 1,
-    'confidence' : 0,
     'loudness_begin' : 0.5,
     'loudness_max' : 0.5,
     'duration' : 0
@@ -21,13 +20,12 @@ def distance_segments(seg1, seg2):
     distances = {
         'pitch' : euclidean_distance(seg1.pitches, seg2.pitches),
         'timbre' : euclidean_distance(seg1.timbre, seg2.timbre),
-        'confidence' : abs(seg1.confidence - seg2.confidence),
         'loudness_begin' : abs(seg1.loudness_begin - seg2.loudness_begin),
         'loudness_max' : abs(seg1.loudness_max - seg2.loudness_max),
         'duration' : abs(seg1.duration - seg2.duration),
     }
     distance = 0
-    for kind, distance in distances:
+    for kind, distance in distances.iteritems():
         distance += distance * weight_params[kind]
     return distance
 
@@ -36,7 +34,7 @@ def distance_beats(beat1, beat2):
     Infinite Jukebox code, view-source:http://labs.echonest.com/Uploader/index.html?trid=TRORQWV13762CDDF4C
     """
     distance = 0
-    for seg1, seg2 in itertools.product(beat1, beat2):
+    for seg1, seg2 in itertools.product(beat1.segments, beat2.segments):
         if seg1 == seg2:
             continue
         distance += distance_segments(seg1, seg2)

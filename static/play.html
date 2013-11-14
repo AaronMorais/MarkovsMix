@@ -1,0 +1,42 @@
+<div class="jumbotron">
+	<div class="row">
+	    <div class=".col-md-2">
+			Play Music Here :)
+		</div>
+		<div id="audio-control">
+		     <input id="play" type="button" value='play' />
+		     <input id="pause" type="button" value='pause' />
+		</div>
+	</div>
+</div>
+
+<script>
+	$(document).ready(function(){ 
+	  var audio = new Audio()
+	  audio.setAttribute("src","music/sng1.ogg")
+
+	  var play = document.getElementById('play')
+	  play.addEventListener('click', function() {
+	  	audio.play()
+	  })
+
+	  var pause = document.getElementById('pause')
+	  pause.addEventListener('click', function() {
+	  	audio.pause()
+	  })
+
+	  audio.addEventListener("ended", function changeAudio() {
+
+	  	var currentTrack = audio.getAttribute("src")
+	  	if(currentTrack == "music/sng1.ogg") {
+	  		audio.setAttribute("src","music/sng2.ogg")
+	  		audio.play()
+	  	}
+	  	else {
+	  		audio.setAttribute("src","music/sng1.ogg")
+	  		audio.play()
+	  	}
+	  	
+	  });
+	});
+</script>
