@@ -5,10 +5,11 @@ import glob
 import random
 from markov import MarkovModel
 import echonest.remix.audio as audio
+from concatenate_mp3 import generate
 
 SAMPLING_STEP = 2
 K = 50
-NGRAM = 10
+NGRAM = 4
 
 def get_cluster_index(beat, clusters):
     closest_cluster = 0
@@ -28,13 +29,10 @@ def main():
 
     #### We can't do this for multiple songs.
     songs = glob.glob("songs/*.mp3")
-    audiofiles = []
+    filename = generate(songs)
     beats = []
-    audiofile = audio.LocalAudioFile("/nail/home/antonio/06 Chum.mp3")
-   # for s in songs:
-   #     audiofile = audio.LocalAudioFile(s)
-   #     audiofiles.append(audiofile)
-    beats += audiofile.analysis.beats
+    audiofile = audio.LocalAudioFile(filename)
+    beats = audiofile.analysis.beats
     print "Number of beats %s" % len(beats)
 
     samples = beats[::SAMPLING_STEP]
