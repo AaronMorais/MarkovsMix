@@ -770,16 +770,17 @@ class KMeansClustering:
             item   - the item to be moved
             origin - the originating cluster
         """
+        if origin.changed:
+            origin.centroid = centroid(origin)
+            origin.changed = False
         closest_cluster = origin
-        closest_centroid = centroid(closest_cluster)
-        cnt = 0
         for cluster in self.__clusters:
-            centre = centroid(cluster)
-            cnt += 1
-            if self.distance(item, centre) < self.distance(item,
-                    closest_centroid):
+            if cluster.changed:
+                cluster.centroid = centroid(cluster)
+                cluster.changed = False
+            if self.distance(item, cluster.centroid) < self.distance(item,
+                    closest_cluster.centroid):
                 closest_cluster = cluster
-                closest_centroid = centroid(closest_cluster)
 
         if id(closest_cluster) != id(origin):
             self.move_item(item, origin, closest_cluster)
@@ -820,10 +821,27 @@ class KMeansClustering:
         # initialise the clusters with empty lists
         self.__clusters = []
         for _ in xrange(clustercount):
-            self.__clusters.append([])
+            self.__clusters.append(BeatCluster())
 
         # distribute the items into the clusters
         count = 0
         for item in input_:
             self.__clusters[count % clustercount].append(item)
             count += 1
+
+
+
+class BeatCluster(list):
+    def __init__(self):
+        self.changed = False
+        self.centroid = None
+
+    def append(self, item):
+        self.changed = True
+        super(BeatCluster, self).append(item)
+
+    def pop(self, index=-1):
+        self.changed = True
+        return super(BeatCluster, self).pop(index)
+
+

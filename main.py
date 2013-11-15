@@ -10,16 +10,21 @@ def mean(values):
 
 def centroid(cluster, method=mean):
 
-    cum_sum = [0 for i in range(len(cluster[0].mean_timbre()))]
+    list_timbre = range(len(cluster[0].mean_timbre()))
+    list_pitches = range(len(cluster[0].mean_pitches()))
+
+    cum_sum = [0 for i in list_timbre]
     for beat in cluster:
-        for i in range(len(beat.mean_timbre())):
-            cum_sum[i] += beat.mean_timbre()[i]
+        timbre = beat.mean_timbre()
+        for i in list_timbre:
+            cum_sum[i] += timbre[i]
     mean_timbre = [value / len(cluster) for value in cum_sum]
 
-    cum_sum = [0 for i in range(len(cluster[0].mean_pitches()))]
+    cum_sum = [0 for i in list_pitches]
     for beat in cluster:
-        for i in range(len(beat.mean_pitches())):
-            cum_sum[i] += beat.mean_pitches()[i]
+        pitches = beat.mean_pitches()
+        for i in list_pitches:
+            cum_sum[i] += pitches[i]
     mean_pitches = [value / len(cluster) for value in cum_sum]
 
     mean_loudness = method([x.mean_loudness() for x in cluster])
@@ -42,7 +47,7 @@ beats = audiofile.analysis.beats
 
 cluster.centroid = centroid
 print len(beats)
-cl = cluster.KMeansClustering(beats[:100], distance.distance_beats)
-print cl.getclusters(20)
+cl = cluster.KMeansClustering(beats, distance.distance_beats)
+result = cl.getclusters(20, 10)
 
-
+import ipdb; ipdb.set_trace()
