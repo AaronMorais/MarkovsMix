@@ -46,12 +46,14 @@
         done: function(e, data) {
           $.each(data.files, function(index, file) {
             var index = data.context[file.name];
+            var p = $('.uploadTable > tbody > tr').get(index).children[1];
+            $('.progress', p).removeClass('active');
             var el = $('.uploadTable > tbody > tr').get(index).children[2];
             var url = URL.createObjectURL(file);
             var a = new Audio(url);
             a.oncanplaythrough = function() {
               el.innerHTML = String(a.duration).toHHMMSS();
-            }
+            };
           });
         },
         progress: function(e, data) {
