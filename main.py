@@ -7,6 +7,7 @@ from markov import MarkovModel
 import echonest.remix.audio as audio
 import argparse
 import shutil
+import os
 
 def get_cluster_index(beat, clusters):
     closest_cluster = 0
@@ -84,7 +85,7 @@ def main():
     audiofile = audio.LocalAudioFile(args.filename)
     beats = audiofile.analysis.beats
     print "Number of beats %s" % len(beats)
-
+    internal_filename = os.path.split(args.filename)[1]
     if not args.pickle:
         samples = beats[::args.sample]
         print "Number of samples to build cluster model %s" % len(samples)
@@ -93,10 +94,10 @@ def main():
         print "Clustering completed"
         for c in clusters:
             c.centroid = None
-        pickle.dump(clusters, open(args.filename[:-4] + ".pickle", "wb"))
+        pickle.dump(clusters, open(internal_filename[:-4] + ".pickle", "wb"))
         print "Pickled Cluster Model"
     else:
-        clusters = pickle.load(open(args.filename[:-4] + ".pickle", "rb"))
+        clusters = pickle.load(open(internal_filename[:-4] + ".pickle", "rb"))
         attach_source(clusters, audiofile)
 
     print "Resetting the centroids"
@@ -128,7 +129,7 @@ def main():
     #### We can't do this for multiple songs.
     print "Saving an Amazing Song"
     out = audio.getpieces(audiofile, generated_beats)
-    out.encode(args.filename[:-4] + ".wav")
+    out.encode(internal_filename[:-4] + ".wav")
 
 
 if __name__ == "__main__":
