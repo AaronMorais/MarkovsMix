@@ -32,15 +32,15 @@ class MarkovModel:
 
     def generate_a_bunch_of_text(self, ngrams_to_use=50):
         ngram = self.generate_initial_ngram()
-        output = ''
+        output = []
         for c in ngram:
-            output += c
+            output.append(c)
         ngrams_used = 1
         while ngrams_used < ngrams_to_use:
             ngram = self.generate_next_ngram(ngram)
-            output += ngram[-1]
+            output.append(ngram[-1])
             ngrams_used += 1
-        print output
+        return output
 
     def generate_initial_ngram(self):
         total_ngrams = 0

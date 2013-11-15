@@ -1,53 +1,77 @@
-import distance
+from distance import distance_beats
 import cluster
-import copy
-
+import pickle
+import glob
+import random
+from markov import MarkovModel
 import echonest.remix.audio as audio
 
+SAMPLING_STEP = 2
+K = 50
+NGRAM = 10
 
-def mean(values):
-    return sum(values)/len(values)
+def get_cluster_index(beat, clusters):
+    closest_cluster = 0
+    closest_distance = distance_beats(beat, clusters[0].centroid)
+    for i in range(len(clusters)):
+        distance = distance_beats(beat, clusters[i].centroid)
+        if distance < closest_distance:
+            closest_cluster = i
+            closest_distance = distance
+    return closest_cluster
 
-def centroid(cluster, method=mean):
+def get_beats_back(index, clusters):
+    c = clusters[index]
+    return c[random.randint(0, len(c) - 1)]
 
-    list_timbre = range(len(cluster[0].mean_timbre()))
-    list_pitches = range(len(cluster[0].mean_pitches()))
+def main():
 
-    cum_sum = [0 for i in list_timbre]
-    for beat in cluster:
-        timbre = beat.mean_timbre()
-        for i in list_timbre:
-            cum_sum[i] += timbre[i]
-    mean_timbre = [value / len(cluster) for value in cum_sum]
+    #### We can't do this for multiple songs.
+    songs = glob.glob("songs/*.mp3")
+    audiofiles = []
+    beats = []
+    audiofile = audio.LocalAudioFile("/nail/home/antonio/06 Chum.mp3")
+   # for s in songs:
+   #     audiofile = audio.LocalAudioFile(s)
+   #     audiofiles.append(audiofile)
+    beats += audiofile.analysis.beats
+    print "Number of beats %s" % len(beats)
 
-    cum_sum = [0 for i in list_pitches]
-    for beat in cluster:
-        pitches = beat.mean_pitches()
-        for i in list_pitches:
-            cum_sum[i] += pitches[i]
-    mean_pitches = [value / len(cluster) for value in cum_sum]
+    samples = beats[::SAMPLING_STEP]
+    print "Number of samples to build cluster model %s" % len(samples)
+    cl = cluster.KMeansClustering(samples, distance_beats)
+    clusters = cl.getclusters(K)
+    print "Clustering completed"
 
-    mean_loudness = method([x.mean_loudness() for x in cluster])
-    mean_duration = method([x.duration for x in cluster])
-    mean_confidence = method([x.confidence for x in cluster])
+    for c in clusters:
+        c.centroid = None
+    pickle.dump(clusters, open("clustering.c", "wb"))
+    print "Pickled Cluster Model"
 
-    centre = copy.deepcopy(cluster[0])
+    for c in clusters:
+        c.centroid = cluster.centroid(c)
+    print "Reset the centroids"
 
-    centre.mean_loudness = lambda: mean_loudness
-    centre.mean_pitches = lambda: mean_pitches
-    centre.mean_timbre = lambda: mean_timbre
-    centre.duration = mean_duration
-    centre.confidence = mean_confidence
-    return centre
+    training_input = []
+    for beat in beats:
+        training_input.append(get_cluster_index(beat, clusters))
+    print("Training markovModel")
+    markov_model = MarkovModel()
+    markov_model.learn_ngram_distribution(training_input, NGRAM)
+
+    #### We should have his function as iterator.
+    print "Generating bunch of music"
+    output_list = markov_model.generate_a_bunch_of_text(len(training_input))
+    generated_beats = audio.AudioQuantumList()
+    print "Coming back to beats"
+    for index in output_list:
+        generated_beats.append(get_beats_back(index, clusters))
+
+    #### We can't do this for multiple songs.
+    print "Saving an Amazing Song"
+    out = audio.getpieces(audiofile, generated_beats)
+    out.encode("bunch_of_music.wav")
 
 
-audiofile = audio.LocalAudioFile("/nail/home/antonio/06 Chum.mp3")
-
-beats = audiofile.analysis.beats
-
-cluster.centroid = centroid
-print len(beats)
-cl = cluster.KMeansClustering(beats, distance.distance_beats)
-result = cl.getclusters(20, 10)
-
-import ipdb; ipdb.set_trace()
+if __name__ == "__main__":
+    main()
