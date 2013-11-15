@@ -6,9 +6,9 @@ import random
 from markov import MarkovModel
 import echonest.remix.audio as audio
 
-SAMPLING_STEP = 2
+SAMPLING_STEP = 4
 K = 50
-NGRAM = 10
+NGRAM = 5
 
 def get_cluster_index(beat, clusters):
     closest_cluster = 0
@@ -20,9 +20,18 @@ def get_cluster_index(beat, clusters):
             closest_distance = distance
     return closest_cluster
 
-def get_beats_back(index, clusters):
+def get_beats_back(index, clusters, prev_beat):
     c = clusters[index]
-    return c[random.randint(0, len(c) - 1)]
+    if prev_beat is None:
+        return c[random.randint(0, len(c)-1)]
+    closest_beat = c[0]
+    curr_dist = distance_beats(closest_beat, prev_beat)
+    for beat in c:
+        this_dist = distance_beats(beat, prev_beat)
+        if this_dist < curr_dist:
+            closest_beat = beat
+            curr_dist = this_dist
+    return closest_beat
 
 def main():
 
@@ -30,7 +39,7 @@ def main():
     songs = glob.glob("songs/*.mp3")
     audiofiles = []
     beats = []
-    audiofile = audio.LocalAudioFile("/nail/home/antonio/06 Chum.mp3")
+    audiofile = audio.LocalAudioFile("/Users/massey/Documents/bach_concerto_6.mp3")
    # for s in songs:
    #     audiofile = audio.LocalAudioFile(s)
    #     audiofiles.append(audiofile)
@@ -63,14 +72,18 @@ def main():
     print "Generating bunch of music"
     output_list = markov_model.generate_a_bunch_of_text(len(training_input))
     generated_beats = audio.AudioQuantumList()
+
     print "Coming back to beats"
+    prev_beat = None
     for index in output_list:
-        generated_beats.append(get_beats_back(index, clusters))
+        curr_beat = get_beats_back(index, clusters, prev_beat)
+        generated_beats.append(curr_beat)
+        prev_beat = curr_beat
 
     #### We can't do this for multiple songs.
     print "Saving an Amazing Song"
     out = audio.getpieces(audiofile, generated_beats)
-    out.encode("bunch_of_music.wav")
+    out.encode("generated_from_bach.wav")
 
 
 if __name__ == "__main__":
