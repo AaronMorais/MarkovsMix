@@ -4,11 +4,11 @@ from math import sqrt
 
 
 weight_params = {
-    'pitch' : 1,
-    'timbre' : 1,
-    'mean_loudness' : 1,
+    'pitch' : 2,
+    'timbre' : 2,
+    'mean_loudness' : 10,
     'confidence' : 0,
-    'duration' : 0
+    'duration' : 5
 }
 
 def euclidean_distance(v1, v2):

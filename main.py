@@ -8,8 +8,8 @@ import echonest.remix.audio as audio
 from concatenate_mp3 import generate
 
 SAMPLING_STEP = 4
-K = 50
-NGRAM = 4
+K = 100
+NGRAM = 50
 
 def get_cluster_index(beat, clusters):
     closest_cluster = 0
@@ -29,7 +29,7 @@ def get_beats_back(index, clusters, prev_beat):
     curr_dist = distance_beats(closest_beat, prev_beat)
     for beat in c:
         this_dist = distance_beats(beat, prev_beat)
-        if this_dist < curr_dist:
+        if this_dist < curr_dist and beat != prev_beat:
             closest_beat = beat
             curr_dist = this_dist
     return closest_beat
