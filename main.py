@@ -5,11 +5,8 @@ import glob
 import random
 from markov import MarkovModel
 import echonest.remix.audio as audio
-from concatenate_mp3 import generate
-
-SAMPLING_STEP = 2
-K = 50
-NGRAM = 4
+import argparse
+import shutil
 
 def get_cluster_index(beat, clusters):
     closest_cluster = 0
@@ -25,27 +22,75 @@ def get_beats_back(index, clusters):
     c = clusters[index]
     return c[random.randint(0, len(c) - 1)]
 
+def generate_single_song(directory):
+    songs = glob.glob("%s/*.mp3" % directory)
+    single_filename = '%s.mp3' % directory
+    destination = open(single_filename, 'wb')
+    for filename in songs:
+        shutil.copyfileobj(open(filename, 'rb'), destination)
+    destination.close()
+    return single_filename
+
+def attach_source(clusters, audiofile):
+    for c in clusters:
+        for b in c:
+            b.source = audiofile
+
 def main():
+    parser = argparse.ArgumentParser(
+        description="Markov")
+    parser.add_argument(
+        "-d", "--directory",
+        default=None,
+        help="Music dir")
+    parser.add_argument(
+        "-f", "--filename",
+        default=None,
+        help="Song file")
+    parser.add_argument(
+        "-p", "--pickle",
+        default=False, action="store_true",
+        help="Pickle")
+    parser.add_argument(
+        "-k", "--clusters", type=int,
+        default=50, help="Clusters")
+    parser.add_argument(
+        "-s", "--sample", type=int,
+        default=2, help="Sampling")
+    parser.add_argument(
+        "-n", "--ngram", type=int,
+        default=10, help="Ngram")
+    parser.add_argument(
+        "-l", "--length", type=int,
+        default=None, help="Length")
+    args = parser.parse_args()
+
+    if args.directory is not None:
+        args.filename = generate_single_song(args.directory)
+    if args.filename is None:
+        raise Exception("Song not defined")
 
     #### We can't do this for multiple songs.
-    songs = glob.glob("songs/*.mp3")
-    filename = generate(songs)
     beats = []
-    audiofile = audio.LocalAudioFile(filename)
+    audiofile = audio.LocalAudioFile(args.filename)
     beats = audiofile.analysis.beats
     print "Number of beats %s" % len(beats)
 
-    samples = beats[::SAMPLING_STEP]
-    print "Number of samples to build cluster model %s" % len(samples)
-    cl = cluster.KMeansClustering(samples, distance_beats)
-    clusters = cl.getclusters(K)
-    print "Clustering completed"
+    if not args.pickle:
+        samples = beats[::args.sample]
+        print "Number of samples to build cluster model %s" % len(samples)
+        cl = cluster.KMeansClustering(samples, distance_beats)
+        clusters = cl.getclusters(args.clusters)
+        print "Clustering completed"
+        for c in clusters:
+            c.centroid = None
+        pickle.dump(clusters, open(args.filename[:-4] + ".pickle", "wb"))
+        print "Pickled Cluster Model"
+    else:
+        clusters = pickle.load(open(args.filename[:-4] + ".pickle", "rb"))
+        attach_source(clusters, audiofile)
 
-    for c in clusters:
-        c.centroid = None
-    pickle.dump(clusters, open("clustering.c", "wb"))
-    print "Pickled Cluster Model"
-
+    print "Resetting the centroids"
     for c in clusters:
         c.centroid = cluster.centroid(c)
     print "Reset the centroids"
@@ -55,11 +100,13 @@ def main():
         training_input.append(get_cluster_index(beat, clusters))
     print("Training markovModel")
     markov_model = MarkovModel()
-    markov_model.learn_ngram_distribution(training_input, NGRAM)
+    markov_model.learn_ngram_distribution(training_input, args.ngram)
 
     #### We should have his function as iterator.
     print "Generating bunch of music"
-    output_list = markov_model.generate_a_bunch_of_text(len(training_input))
+    if args.length is None:
+        args.length = len(training_input)
+    output_list = markov_model.generate_a_bunch_of_text(args.length)
     generated_beats = audio.AudioQuantumList()
     print "Coming back to beats"
     for index in output_list:
@@ -68,7 +115,7 @@ def main():
     #### We can't do this for multiple songs.
     print "Saving an Amazing Song"
     out = audio.getpieces(audiofile, generated_beats)
-    out.encode("bunch_of_music.wav")
+    out.encode(args.filename[:-4] + ".wav")
 
 
 if __name__ == "__main__":

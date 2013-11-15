@@ -6,7 +6,7 @@ from math import sqrt
 weight_params = {
     'pitch' : 1,
     'timbre' : 1,
-    'mean_loudness' : 1,
+    'mean_loudness' : 10,
     'confidence' : 0,
     'duration' : 0
 }

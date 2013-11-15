@@ -185,7 +185,8 @@ def centroid(cluster, method=mean):
     mean_duration = method([x.duration for x in cluster])
     mean_confidence = method([x.confidence for x in cluster])
 
-    centre = deepcopy(cluster[0])
+    element_type = type(cluster[0])
+    centre = element_type()
 
     centre.mean_loudness = lambda: mean_loudness
     centre.mean_pitches = lambda: mean_pitches
