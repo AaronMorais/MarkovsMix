@@ -76,7 +76,7 @@ def main():
     audiofile = audio.LocalAudioFile(args.filename)
     beats = audiofile.analysis.beats
     print "Number of beats %s" % len(beats)
-    internal_filename = os.path.split[1]
+    internal_filename = os.path.split(args.filename)[1]
     if not args.pickle:
         samples = beats[::args.sample]
         print "Number of samples to build cluster model %s" % len(samples)
