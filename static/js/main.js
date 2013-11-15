@@ -1,26 +1,8 @@
-var songs = [
-	{
-		title: "Fun",
-		length: "2:20"
-	},
-	{
-		title:"Hello",
-		length: "5:10"
-	},
-	{
-		title:"Rolling in the deep",
-		length: "10:10"
-	},
-]
-
-function updateTable () {
-	var table = $(".uploadTable tbody");
-	var entries = [];
-	for (var i = 0; i < songs.length; i++) {
-		var row = "<tr><td>" + (i+1) + "</td><td>" + songs[i].title + "</td><td>" + songs[i].length + "</td></tr>";
-		entries.push(row);
-	}
-	table.html(entries);
+function addSong(song) {
+  var table = $(".uploadTable tbody");
+  var progress = '<div style="vertical-align:middle;" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>';
+  var row = '<tr><td>' + song.title + '</td><td>' + progress + '</td><td>' + song.length + '</td></tr>';
+  table.append(row);
 }
 
 var loading = false;
@@ -65,3 +47,16 @@ function updateContainer(path, animated) {
       });
    };
 })(jQuery);
+
+String.prototype.toHHMMSS = function () {
+  var sec_num = parseInt(this, 10); // don't forget the second parm
+  var hours   = Math.floor(sec_num / 3600);
+  var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+  var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+  if (hours   < 10) {hours   = "0"+hours;}
+  if (minutes < 10) {minutes = "0"+minutes;}
+  if (seconds < 10) {seconds = "0"+seconds;}
+  var time    = hours+':'+minutes+':'+seconds;
+  return time;
+}
