@@ -5,23 +5,66 @@
     <table class="table table-striped uploadTable">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Song Name</th>
-            <th>Length</th>
+            <th width="65%">Song Name</th>
+            <th width="15%"></th>
+            <th width="20%">Length</th>
           </tr>
         </thead>
         <tbody>
         </tbody>
       </table>
     </br>
-    <p>
-      <a class="btn btn-lg btn-primary" onclick="" role="button">Upload</a>
-      <a class="btn btn-lg btn-primary" onclick='updateContainer("/static/loading.html")' role="button">Done</a>
-    </p>
+    <form id="fileupload" action="localhost:8888" method="POST" enctype="multipart/form-data">
+      <span class="btn btn-success fileinput-button">
+        <i class="glyphicon glyphicon-plus"></i>
+        <span>Add files...</span>
+        <input type="file" name="files[]" multiple>
+      </span>
+      <button onclick='updateContainer("/static/loading.html")' class="btn btn-primary start">
+        <i class="glyphicon glyphicon-upload"></i>
+        <span>Markov!</span>
+      </button>
+    </form>
 </div>
 
 <script type="text/javascript">
 	$(document).ready(function(){ 
-    	updateTable();
+      $('#fileupload').fileupload({
+        url: 'http://localhost:8888',
+        add: function(e, data) {
+          var ni = [];
+          $.each(data.files, function(index, file) {
+            ni[file.name] = $('.uploadTable tbody').children().length;
+            addSong({
+              title: file.name,
+              length: '-'
+            });
+          });
+          data.context = ni;
+          data.submit();
+        },
+        done: function(e, data) {
+          $.each(data.files, function(index, file) {
+            var index = data.context[file.name];
+            var el = $('.uploadTable > tbody > tr').get(index).children[2];
+            var url = URL.createObjectURL(file);
+            var a = new Audio(url);
+            a.oncanplaythrough = function() {
+              el.innerHTML = String(a.duration).toHHMMSS();
+            }
+          });
+        },
+        progress: function(e, data) {
+          $.each(data.files, function(index, file) {
+            var index = data.context[file.name];
+            var el = $('.uploadTable > tbody > tr').get(index).children[1];
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('.progress-bar', el).css(
+              'width',
+              progress + '%'
+            );
+          });
+        }
+      });
 	});
 </script>
