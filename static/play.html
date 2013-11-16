@@ -1,16 +1,45 @@
 <div class="jumbotron">
 	<div class="row">
 	    <div class=".col-md-2">
-			Play Music Here :)
+	    Here are some generated songs!
 		</div>
 		<div id="audio-control">
-		     <input id="play" type="button" value='play' />
+	      <button onclick='beginSongWithSource("music/bunch_of_music.mp3")' class="btn btn-primary start">
+	      	Bunch of Music
+	      </button>
+  	      <button onclick='beginSongWithSource("music/chopin_nocturne_n_200.mp3")' class="btn btn-primary start">
+  	      Chopin Nocturne
+	      </button>
+  	      <button onclick='beginSongWithSource("music/chopin_nocturne9_2.mp3")' class="btn btn-primary start">
+  	      Chopin Nocturne 2
+	      </button>
+		   <button onclick='beginSongWithSource("music/combination_skrillex_n_200_k_unknown.mp3")' class="btn btn-primary start">
+		   Skrillex
+	      </button>
+          <button onclick='beginSongWithSource("music/BillieJean_150_k50.mp3")' class="btn btn-primary start">
+           Billie Jean
+	      </button>
+	      <button onclick='beginSongWithSource("music/generated_from_bach.mp3")' class="btn btn-primary start">
+	      	Bach
+	      </button>
+	      <button onclick='beginSongWithSource("music/generated_from_classical.mp3")' class="btn btn-primary start">
+	      	Classical
+	      </button>
+  	      <button onclick='beginSongWithSource("music/maad_city_n_equals_150.mp3")' class="btn btn-primary start">
+	      	Maad City
+	      </button>
+		   <button onclick='beginSongWithSource("music/mama.mp3")' class="btn btn-primary start">
+	      	Mama
+	      </button>
+	      <button onclick='beginSongWithSource("music/Thriller_100_k50.mp3")' class="btn btn-primary start">
+	      	Thriller
+	      </button>
+		   <button onclick='beginSongWithSource("music/uns.mp3")' class="btn btn-primary start">
+	      	Uns
+	      </button>
+	      <button onclick='beginSongWithSource("music/hive_n_150_k50.mp3")' class="btn btn-primary start">
+	      	Rap
+	      </button>
 		</div>
 	</div>
 </div>
-
-<script type="text/javascript">
-	$(document).ready(function(){ 
-		beginMusic();
-	});
-</script>
